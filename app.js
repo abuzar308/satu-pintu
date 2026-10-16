@@ -176,8 +176,15 @@ class AppState {
     sessionStorage.setItem(STORAGE_KEYS.ADMIN_SESSION, status ? 'true' : 'false');
   }
 
-  setAdminPassword(newPassword) {
+  setAdminPasswordLocal(newPassword) {
     localStorage.setItem(STORAGE_KEYS.ADMIN_PASSWORD, newPassword);
+  }
+
+  async setAdminPassword(newPassword) {
+    this.setAdminPasswordLocal(newPassword);
+    if (FirebaseService.isInitialized) {
+      await FirebaseService.syncAdminPassword(newPassword);
+    }
   }
 
   getAdminPassword() {
@@ -197,6 +204,7 @@ const FirebaseService = {
   isConnected: false,
   unsubscribeLinks: null,
   unsubscribeMeta: null,
+  unsubscribeAuth: null,
 
   getConfig() {
     // 1. Berkas firebase-config.js diutamakan jika sudah diisi konfigurasi valid
@@ -250,6 +258,7 @@ const FirebaseService = {
 
     if (this.unsubscribeLinks) this.unsubscribeLinks();
     if (this.unsubscribeMeta) this.unsubscribeMeta();
+    if (this.unsubscribeAuth) this.unsubscribeAuth();
 
     // Listener Realtime untuk Koleksi Tautan
     this.unsubscribeLinks = this.db.collection('nexuslink_links').onSnapshot((snapshot) => {
@@ -298,6 +307,26 @@ const FirebaseService = {
       }
     }, (error) => {
       console.error('Firestore snapshot categories error:', error);
+    });
+
+    // Listener Realtime untuk Dokumen Autentikasi Admin (Sinkronisasi Antar Perangkat)
+    this.unsubscribeAuth = this.db.collection('nexuslink_meta').doc('auth').onSnapshot((doc) => {
+      if (doc.exists && doc.data() && doc.data().adminPassword) {
+        const cloudPwd = doc.data().adminPassword;
+        state.setAdminPasswordLocal(cloudPwd);
+        updateRoleUI();
+      } else {
+        // Jika di Firestore belum tersimpan dokumen auth, tetapi di perangkat ini sudah ada sandi kustom lokal,
+        // otomatis migrasikan ke Firestore agar langsung tersinkron ke semua perangkat lain!
+        const currentLocalPwd = state.getAdminPassword();
+        if (currentLocalPwd && currentLocalPwd !== DEFAULT_ADMIN_PASSWORD) {
+          this.syncAdminPassword(currentLocalPwd).catch(err => {
+            console.warn('Gagal migrasi sandi lokal ke cloud:', err);
+          });
+        }
+      }
+    }, (error) => {
+      console.warn('Firestore snapshot auth error:', error);
     });
   },
 
@@ -351,6 +380,25 @@ const FirebaseService = {
     if (this.isInitialized && this.db) {
       await this.db.collection('nexuslink_meta').doc('categories').set({ list: categoriesList });
     }
+  },
+
+  async syncAdminPassword(password) {
+    if (this.isInitialized && this.db) {
+      await this.db.collection('nexuslink_meta').doc('auth').set({
+        adminPassword: password,
+        updatedAt: Date.now()
+      }, { merge: true });
+    }
+  },
+
+  async getCloudPasswordDoc() {
+    if (this.isInitialized && this.db) {
+      const doc = await this.db.collection('nexuslink_meta').doc('auth').get();
+      if (doc.exists) {
+        return doc.data();
+      }
+    }
+    return null;
   },
 
   async seedDefaults() {
@@ -571,9 +619,33 @@ function handleAuthButtonClick() {
   }
 }
 
-function handleLoginSubmit(e) {
+async function handleLoginSubmit(e) {
   e.preventDefault();
   const enteredPassword = DOM.adminPasswordInput.value.trim();
+  const submitBtn = DOM.adminLoginForm ? DOM.adminLoginForm.querySelector('button[type="submit"]') : null;
+  const originalText = submitBtn ? submitBtn.innerHTML : '';
+
+  try {
+    // Ambil sandi terbaru dari cloud Firestore jika terhubung agar perangkat baru langsung sinkron
+    if (FirebaseService.isInitialized && FirebaseService.db) {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Memverifikasi...</span>';
+      }
+      const cloudAuth = await FirebaseService.getCloudPasswordDoc();
+      if (cloudAuth && cloudAuth.adminPassword) {
+        state.setAdminPasswordLocal(cloudAuth.adminPassword);
+      }
+    }
+  } catch (err) {
+    console.warn('Gagal cek sandi cloud saat login:', err);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  }
+
   const correctPassword = state.getAdminPassword();
 
   if (enteredPassword === correctPassword) {
@@ -1294,7 +1366,7 @@ function openChangePasswordModal() {
   DOM.currentPasswordInput.focus();
 }
 
-function handleChangePasswordSubmit(e) {
+async function handleChangePasswordSubmit(e) {
   e.preventDefault();
 
   if (!state.isAdmin) {
@@ -1335,11 +1407,29 @@ function handleChangePasswordSubmit(e) {
     return;
   }
 
-  // Simpan kata sandi baru ke storage
-  state.setAdminPassword(newPwd);
-  closeModal(DOM.modalChangePassword);
-  updateRoleUI();
-  showToast('Kata sandi admin berhasil diperbarui! Harap ingat sandi baru Anda.', 'success');
+  const saveBtn = DOM.changePasswordForm.querySelector('button[type="submit"]');
+  const originalSaveText = saveBtn ? saveBtn.innerHTML : '';
+
+  try {
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>Menyimpan ke Cloud...</span>';
+    }
+
+    // Simpan kata sandi baru ke storage lokal & Cloud Firestore
+    await state.setAdminPassword(newPwd);
+    closeModal(DOM.modalChangePassword);
+    updateRoleUI();
+    showToast('Kata sandi admin berhasil diperbarui dan disinkronkan ke seluruh perangkat (HP & Laptop)!', 'success');
+  } catch (err) {
+    console.error('Gagal menyimpan kata sandi ke cloud:', err);
+    showChangePwdError('Gagal menyinkronkan ke Cloud: ' + (err.message || 'Periksa koneksi internet'));
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalSaveText;
+    }
+  }
 }
 
 function showChangePwdError(message) {
