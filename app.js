@@ -205,7 +205,7 @@ const FirebaseService = {
       try {
         const parsed = JSON.parse(savedCustom);
         if (parsed.apiKey && !parsed.apiKey.startsWith('ISI_')) return parsed;
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // 2. Cek variabel FIREBASE_CONFIG dari firebase-config.js
@@ -605,8 +605,8 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
    =================================================================== */
 function updateStats() {
   // Hanya hitung link yang tampil untuk pengunjung jika non-admin
-  const visibleLinks = state.isAdmin 
-    ? state.links 
+  const visibleLinks = state.isAdmin
+    ? state.links
     : state.links.filter(l => l.isVisible !== false);
 
   DOM.totalLinksCount.textContent = visibleLinks.length;
@@ -657,8 +657,8 @@ function renderLinks() {
   DOM.linksGrid.innerHTML = '';
 
   // 1. Saring berdasarkan visibilitas (pengunjung hanya melihat isVisible: true)
-  let displayed = state.isAdmin 
-    ? [...state.links] 
+  let displayed = state.isAdmin
+    ? [...state.links]
     : state.links.filter(link => link.isVisible !== false);
 
   // 2. Saring berdasarkan Kategori
@@ -669,7 +669,7 @@ function renderLinks() {
   // 3. Saring berdasarkan Kata Kunci Pencarian
   const query = state.searchQuery.toLowerCase().trim();
   if (query) {
-    displayed = displayed.filter(link => 
+    displayed = displayed.filter(link =>
       (link.title && link.title.toLowerCase().includes(query)) ||
       (link.description && link.description.toLowerCase().includes(query)) ||
       (link.url && link.url.toLowerCase().includes(query)) ||
@@ -706,8 +706,8 @@ function renderLinks() {
       DOM.btnEmptyAdd.classList.add('hidden');
     } else {
       DOM.emptyTitle.textContent = 'Belum Ada Tautan di Kategori Ini';
-      DOM.emptyDescription.textContent = state.isAdmin 
-        ? 'Sebagai admin, Anda dapat mulai menambahkan tautan tampilan sekarang.' 
+      DOM.emptyDescription.textContent = state.isAdmin
+        ? 'Sebagai admin, Anda dapat mulai menambahkan tautan tampilan sekarang.'
         : 'Silakan hubungi administrator untuk menambahkan tautan ke dashboard ini.';
       if (state.isAdmin) {
         DOM.btnEmptyAdd.classList.remove('hidden');
@@ -1224,7 +1224,7 @@ function handleImportBackup(e) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = function(event) {
+  reader.onload = function (event) {
     try {
       const data = JSON.parse(event.target.result);
       if (Array.isArray(data.links) && Array.isArray(data.categories)) {
@@ -1356,7 +1356,7 @@ function parseFirebaseConfigInput(text) {
   try {
     const obj = JSON.parse(raw);
     if (obj.apiKey) return obj;
-  } catch (e) {}
+  } catch (e) { }
 
   // 2. Ekstrak properti menggunakan regex jika user menempel potongan JS (misal const firebaseConfig = { ... })
   const extract = (key) => {
