@@ -1071,6 +1071,10 @@ function handleSaveLinkSubmit(e) {
   }
 
   closeModal(DOM.modalLinkEditor);
+  state.currentCategory = 'Semua';
+  state.searchQuery = '';
+  if (DOM.searchInput) DOM.searchInput.value = '';
+  renderCategoryFilterPills();
   renderLinks();
   updateStats();
 }

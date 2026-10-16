@@ -330,7 +330,7 @@
         <button class="modal-close-btn" id="btnCloseLinkModal">&times;</button>
       </div>
 
-      <form id="linkForm" class="modal-form">
+      <form id="linkForm" class="modal-form" novalidate>
         <input type="hidden" id="linkIdInput">
 
         <div class="form-row">
@@ -351,9 +351,10 @@
           <label for="linkUrlInput">URL Target Tautan <span class="required">*</span></label>
           <div class="url-input-wrap">
             <span class="url-prefix">https://</span>
-            <input type="url" id="linkUrlInput" placeholder="example.com/portal" required>
+            <input type="text" id="linkUrlInput" placeholder="example.com/portal" required>
           </div>
-          <span class="form-hint">Masukkan alamat URL lengkap termasuk protokol http:// atau https://</span>
+          <span class="form-hint">Bisa masukkan nama domain langsung (misal: google.com) atau alamat lengkap
+            https://</span>
         </div>
 
         <div class="form-group">
