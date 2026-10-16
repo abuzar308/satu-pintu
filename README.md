@@ -69,11 +69,50 @@ d:\Antigravity Ide\
 │
 ├── index.html        # Struktur antarmuka semantik, form modal, dan tata letak
 ├── styles.css        # Desain visual Glassmorphism, animasi ambient glow & responsivitas
-├── app.js            # Logika kontrol akses peran, CRUD link, pencarian, dan penyimpanan lokal
+├── app.js            # Logika kontrol akses peran, CRUD link, pencarian, dan sinkronisasi Cloud Firestore
+├── firebase-config.js# Berkas konfigurasi kunci Cloud Database Firebase
 └── README.md         # Dokumentasi panduan penggunaan aplikasi
 ```
 
 ---
 
-## 💾 Penyimpanan Data
-Seluruh data tautan, kategori, dan statistik klik disimpan secara persisten di peramban menggunakan `localStorage` peramban web pengguna. Data tidak akan hilang ketika halaman dimuat ulang (*refresh*).
+## ☁️ Integrasi Database Online (Firebase Firestore)
+
+Aplikasi ini mendukung penyimpanan **Cloud Database Realtime (Firebase Firestore)** secara gratis dari Google, sehingga tautan yang Anda tambah, edit, atau hapus langsung tersinkronisasi ke semua HP dan komputer pengunjung secara otomatis tanpa perlu muat ulang (*refresh*).
+
+### Cara Menghubungkan Firebase:
+
+1. **Buat Database Firestore (Gratis)**:
+   - Kunjungi [console.firebase.google.com](https://console.firebase.google.com/) dan buat proyek baru (misal: `nexuslink-hub`).
+   - Pilih menu **Build ➔ Firestore Database ➔ Create database** (Pilih mode: *Start in test mode*).
+   - Di tab **Rules**, pastikan aturannya mengizinkan baca/tulis:
+     ```text
+     rules_version = '2';
+     service cloud.firestore {
+       match /databases/{database}/documents {
+         match /{document=**} {
+           allow read, write: if true;
+         }
+       }
+     }
+     ```
+     Klik **Publish**.
+
+2. **Dapatkan Kunci Aplikasi Web**:
+   - Klik ikon **Project Settings (Gerigi ⚙️)** ➔ di bagian *Your apps*, pilih ikon Web (`</>`).
+   - Daftarkan aplikasi dan salin objek `firebaseConfig`.
+
+3. **Sambungkan ke Aplikasi (Pilih Salah Satu Cara)**:
+   - **Cara A (Langsung dari Tampilan Web)**:
+     1. Buka [index.html](file:///d:/Antigravity%20Ide/index.html) di peramban.
+     2. Klik **"Masuk Admin"** (sandi: `admin123`).
+     3. Klik tombol **"Cloud Firebase"** di bilah navigasi atas.
+     4. Tempelkan objek konfigurasi ke dalam kotak textarea, lalu klik **"Uji & Hubungkan Sekarang"**.
+     5. Klik tombol **"Unggah Data Demo ke Cloud"** untuk mengirimkan data awal ke Firestore.
+   - **Cara B (Tersimpan Permanen di Kode)**:
+     - Buka berkas [firebase-config.js](file:///d:/Antigravity%20Ide/firebase-config.js) dan tempel nilai konfigurasi Anda. Semua pengunjung yang membuka situs akan langsung otomatis terhubung ke Firestore.
+
+---
+
+## 💾 Mode Penyimpanan Cadangan (Lokal)
+Jika Firebase belum dihubungkan, sistem akan otomatis menggunakan `localStorage` peramban web lokal sehingga tautan tetap tersimpan secara aman di perangkat Anda.

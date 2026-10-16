@@ -1581,6 +1581,204 @@ body {
 }
 
 /* ===================================================================
+   CLOUD INDICATOR & FIREBASE MODAL
+   =================================================================== */
+.cloud-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  user-select: none;
+}
+
+.cloud-indicator:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--border-glass);
+}
+
+.cloud-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #64748b;
+  transition: all var(--transition-fast);
+}
+
+.cloud-indicator.connected {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.cloud-indicator.connected .cloud-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulseGreen 2s infinite;
+}
+
+.cloud-indicator.offline {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+.cloud-indicator.offline .cloud-dot {
+  background: #f59e0b;
+}
+
+.cloud-indicator.connecting {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+}
+
+.cloud-indicator.connecting .cloud-dot {
+  background: #6366f1;
+  animation: pulseGreen 1s infinite;
+}
+
+/* Modal Cloud Specifics */
+.modal-box.modal-cloud {
+  max-width: 680px;
+}
+
+.modal-header-icon.cloud {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(99, 102, 241, 0.2));
+  color: #38bdf8;
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.modal-cloud-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cloud-status-card {
+  padding: 1.15rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+}
+
+.cloud-status-card.connected {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.cloud-status-card.offline {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.cloud-status-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.cloud-dot-large {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #64748b;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.cloud-status-card.connected .cloud-dot-large {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.cloud-status-card.offline .cloud-dot-large {
+  background: #f59e0b;
+}
+
+.cloud-status-info strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.cloud-status-info p {
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.cloud-steps-guide {
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.cloud-steps-guide h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #c7d2fe;
+  margin-bottom: 0.6rem;
+}
+
+.cloud-steps-guide ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cloud-steps-guide li {
+  margin-bottom: 0.35rem;
+}
+
+.cloud-steps-guide a {
+  color: #818cf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.code-textarea {
+  width: 100%;
+  background: rgba(9, 13, 22, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  color: #38bdf8;
+  font-family: 'Consolas', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color var(--transition-fast);
+}
+
+.code-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.cloud-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+/* ===================================================================
    RESPONSIVE DESIGN (MOBILE & TABLET)
    =================================================================== */
 @media (max-width: 768px) {

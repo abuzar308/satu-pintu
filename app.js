@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   LINKS: 'nexuslink_items',
   CATEGORIES: 'nexuslink_categories',
   ADMIN_SESSION: 'nexuslink_admin_active',
-  ADMIN_PASSWORD: 'nexuslink_admin_pwd'
+  ADMIN_PASSWORD: 'nexuslink_admin_pwd',
+  FIREBASE_CUSTOM: 'nexuslink_firebase_custom_config'
 };
 
 // Kata Sandi Admin Bawaan (Default Password)
@@ -142,8 +143,12 @@ class AppState {
     return [...INITIAL_LINKS];
   }
 
-  saveLinks() {
+  saveLinksLocal() {
     localStorage.setItem(STORAGE_KEYS.LINKS, JSON.stringify(this.links));
+  }
+
+  saveLinks() {
+    this.saveLinksLocal();
   }
 
   loadCategories() {
@@ -157,8 +162,13 @@ class AppState {
     return [...INITIAL_CATEGORIES];
   }
 
-  saveCategories() {
+  saveCategoriesLocal() {
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(this.categories));
+  }
+
+  saveCategories() {
+    this.saveCategoriesLocal();
+    FirebaseService.syncCategories(this.categories).catch(err => console.warn('Sync categories err:', err));
   }
 
   setAdminStatus(status) {
@@ -177,6 +187,174 @@ class AppState {
 
 // Inisialisasi Objek Global State
 const state = new AppState();
+
+/* ===================================================================
+   LAYANAN DATABASE CLOUD FIREBASE (FIRESTORE)
+   =================================================================== */
+const FirebaseService = {
+  db: null,
+  isInitialized: false,
+  isConnected: false,
+  unsubscribeLinks: null,
+  unsubscribeMeta: null,
+
+  getConfig() {
+    // 1. Cek konfigurasi kustom di localStorage jika admin pernah mengisi lewat modal
+    const savedCustom = localStorage.getItem(STORAGE_KEYS.FIREBASE_CUSTOM);
+    if (savedCustom) {
+      try {
+        const parsed = JSON.parse(savedCustom);
+        if (parsed.apiKey && !parsed.apiKey.startsWith('ISI_')) return parsed;
+      } catch (e) {}
+    }
+
+    // 2. Cek variabel FIREBASE_CONFIG dari firebase-config.js
+    if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('ISI_')) {
+      return FIREBASE_CONFIG;
+    }
+
+    return null;
+  },
+
+  async init() {
+    const config = this.getConfig();
+    if (!config) {
+      this.updateStatus('offline', 'Mode Penyimpanan Lokal (Offline)', 'Tautan tersimpan di browser perangkat ini. Hubungkan Firebase agar tersinkronisasi ke semua HP/Laptop secara realtime.');
+      return;
+    }
+
+    if (typeof firebase === 'undefined') {
+      console.warn('Firebase SDK compat belum termuat.');
+      this.updateStatus('offline', 'Koneksi Cloud Tertunda', 'SDK Firebase belum selesai dimuat. Pastikan koneksi internet aktif.');
+      return;
+    }
+
+    this.updateStatus('connecting', 'Menghubungkan ke Cloud...', 'Menyambungkan ke database Firebase Firestore...');
+
+    try {
+      if (firebase.apps.length) {
+        await Promise.all(firebase.apps.map(app => app.delete()));
+      }
+      firebase.initializeApp(config);
+      this.db = firebase.firestore();
+      this.isInitialized = true;
+      this.listenToChanges();
+    } catch (err) {
+      console.error('Gagal inisialisasi Firebase:', err);
+      this.updateStatus('offline', 'Koneksi Cloud Gagal', `Error: ${err.message}`);
+    }
+  },
+
+  listenToChanges() {
+    if (!this.db) return;
+
+    if (this.unsubscribeLinks) this.unsubscribeLinks();
+    if (this.unsubscribeMeta) this.unsubscribeMeta();
+
+    // Listener Realtime untuk Koleksi Tautan
+    this.unsubscribeLinks = this.db.collection('nexuslink_links').onSnapshot((snapshot) => {
+      this.isConnected = true;
+      this.updateStatus('connected', 'Cloud Database Aktif (Realtime)', 'Terhubung ke Firebase Firestore. Setiap perubahan otomatis tersinkronisasi ke seluruh pengunjung.');
+
+      if (!snapshot.empty) {
+        const remoteLinks = [];
+        snapshot.forEach(doc => {
+          remoteLinks.push({ id: doc.id, ...doc.data() });
+        });
+        state.links = remoteLinks;
+        state.saveLinksLocal();
+        renderLinks();
+        updateStats();
+      } else {
+        // Jika database di Firestore masih kosong sama sekali, seed data otomatis
+        this.seedDefaults().catch(e => console.warn('Auto seed skipped:', e));
+      }
+    }, (error) => {
+      console.error('Firestore snapshot links error:', error);
+      this.isConnected = false;
+      this.updateStatus('offline', 'Sinkronisasi Cloud Terputus', `Izin baca/tulis Firestore bermasalah: ${error.message}`);
+    });
+
+    // Listener Realtime untuk Kategori
+    this.unsubscribeMeta = this.db.collection('nexuslink_meta').doc('categories').onSnapshot((doc) => {
+      if (doc.exists && Array.isArray(doc.data().list) && doc.data().list.length > 0) {
+        state.categories = doc.data().list;
+        state.saveCategoriesLocal();
+        renderCategoryFilterPills();
+        populateCategorySelect();
+        updateStats();
+      }
+    }, (error) => {
+      console.error('Firestore snapshot categories error:', error);
+    });
+  },
+
+  updateStatus(status, title, desc) {
+    if (DOM.cloudIndicator) {
+      DOM.cloudIndicator.className = `cloud-indicator ${status}`;
+      if (DOM.cloudText) {
+        if (status === 'connected') DOM.cloudText.textContent = 'Cloud Terhubung';
+        else if (status === 'connecting') DOM.cloudText.textContent = 'Menyambungkan...';
+        else DOM.cloudText.textContent = 'Mode Lokal';
+      }
+    }
+    if (DOM.cloudStatusCard) {
+      DOM.cloudStatusCard.className = `cloud-status-card ${status}`;
+      if (DOM.cloudModalStatusTitle) DOM.cloudModalStatusTitle.textContent = title;
+      if (DOM.cloudModalStatusDesc) DOM.cloudModalStatusDesc.textContent = desc;
+    }
+  },
+
+  async saveLink(link) {
+    if (this.isInitialized && this.db) {
+      await this.db.collection('nexuslink_links').doc(link.id).set(link);
+    }
+  },
+
+  async deleteLink(linkId) {
+    if (this.isInitialized && this.db) {
+      await this.db.collection('nexuslink_links').doc(linkId).delete();
+    }
+  },
+
+  async updateLinkField(linkId, fields) {
+    if (this.isInitialized && this.db) {
+      await this.db.collection('nexuslink_links').doc(linkId).update(fields);
+    }
+  },
+
+  async recordClick(linkId) {
+    if (this.isInitialized && this.db && typeof firebase !== 'undefined') {
+      try {
+        await this.db.collection('nexuslink_links').doc(linkId).update({
+          clicks: firebase.firestore.FieldValue.increment(1)
+        });
+      } catch (e) {
+        console.warn('Gagal record click ke Cloud:', e);
+      }
+    }
+  },
+
+  async syncCategories(categoriesList) {
+    if (this.isInitialized && this.db) {
+      await this.db.collection('nexuslink_meta').doc('categories').set({ list: categoriesList });
+    }
+  },
+
+  async seedDefaults() {
+    if (!this.isInitialized || !this.db) {
+      throw new Error('Database Firebase belum terhubung.');
+    }
+    const batch = this.db.batch();
+    INITIAL_LINKS.forEach(link => {
+      const ref = this.db.collection('nexuslink_links').doc(link.id);
+      batch.set(ref, link);
+    });
+    const catRef = this.db.collection('nexuslink_meta').doc('categories');
+    batch.set(catRef, { list: INITIAL_CATEGORIES });
+    await batch.commit();
+  }
+};
 
 /* ===================================================================
    ELEMEN DOM
@@ -273,6 +451,23 @@ const DOM = {
   btnToggleNewPwd: document.getElementById('btnToggleNewPwd'),
   btnCloseChangePwdModal: document.getElementById('btnCloseChangePwdModal'),
   btnCancelChangePwd: document.getElementById('btnCancelChangePwd'),
+
+  // Cloud Indicator & Modal Firebase
+  cloudIndicator: document.getElementById('cloudIndicator'),
+  cloudDot: document.getElementById('cloudDot'),
+  cloudText: document.getElementById('cloudText'),
+  btnOpenCloudModal: document.getElementById('btnOpenCloudModal'),
+  modalCloudConfig: document.getElementById('modalCloudConfig'),
+  cloudStatusCard: document.getElementById('cloudStatusCard'),
+  cloudModalDot: document.getElementById('cloudModalDot'),
+  cloudModalStatusTitle: document.getElementById('cloudModalStatusTitle'),
+  cloudModalStatusDesc: document.getElementById('cloudModalStatusDesc'),
+  cloudConfigForm: document.getElementById('cloudConfigForm'),
+  firebaseConfigInput: document.getElementById('firebaseConfigInput'),
+  btnSaveCloudConfig: document.getElementById('btnSaveCloudConfig'),
+  btnCopyFileConfig: document.getElementById('btnCopyFileConfig'),
+  btnSeedCloudData: document.getElementById('btnSeedCloudData'),
+  btnCloseCloudModal: document.getElementById('btnCloseCloudModal'),
 
   // Toasts
   toastContainer: document.getElementById('toastContainer')
@@ -672,6 +867,7 @@ function attachCardEvents(card, link) {
     openBtn.addEventListener('click', () => {
       link.clicks = (link.clicks || 0) + 1;
       state.saveLinks();
+      FirebaseService.recordClick(link.id);
       const clickEl = document.getElementById(`clicks-val-${link.id}`);
       if (clickEl) clickEl.textContent = link.clicks;
       updateStats();
@@ -706,6 +902,7 @@ function attachCardEvents(card, link) {
     pinBtn.addEventListener('click', () => {
       link.isPinned = !link.isPinned;
       state.saveLinks();
+      FirebaseService.updateLinkField(link.id, { isPinned: link.isPinned }).catch(e => console.warn(e));
       renderLinks();
       showToast(`Tautan "${link.title}" ${link.isPinned ? 'disematkan di atas' : 'dilepas dari sematan'}.`, 'info');
     });
@@ -717,6 +914,7 @@ function attachCardEvents(card, link) {
     visBtn.addEventListener('click', () => {
       link.isVisible = link.isVisible === false ? true : false;
       state.saveLinks();
+      FirebaseService.updateLinkField(link.id, { isVisible: link.isVisible }).catch(e => console.warn(e));
       renderLinks();
       updateStats();
       showToast(`Tautan "${link.title}" sekarang ${link.isVisible ? 'dapat dilihat pengunjung' : 'disembunyikan (draft)'}.`, 'info');
@@ -820,6 +1018,9 @@ function handleSaveLinkSubmit(e) {
         updatedAt: Date.now()
       };
       state.saveLinks();
+      FirebaseService.saveLink(state.links[index]).catch(err => {
+        console.error('Gagal sync ke Firebase:', err);
+      });
       showToast(`Tautan "${title}" berhasil diperbarui!`, 'success');
     }
   } else {
@@ -839,6 +1040,9 @@ function handleSaveLinkSubmit(e) {
     };
     state.links.unshift(newLink);
     state.saveLinks();
+    FirebaseService.saveLink(newLink).catch(err => {
+      console.error('Gagal sync ke Firebase:', err);
+    });
     showToast(`Tautan "${title}" berhasil ditambahkan ke dashboard!`, 'success');
   }
 
@@ -858,6 +1062,9 @@ function handleDeleteLink(linkId, title) {
 
   state.links = state.links.filter(l => l.id !== linkId);
   state.saveLinks();
+  FirebaseService.deleteLink(linkId).catch(err => {
+    console.error('Gagal delete dari Firebase:', err);
+  });
   renderLinks();
   updateStats();
   showToast(`Tautan "${title}" berhasil dihapus.`, 'info');
@@ -1097,6 +1304,126 @@ function showChangePwdError(message) {
 }
 
 /* ===================================================================
+   MODAL KONFIGURASI CLOUD FIREBASE
+   =================================================================== */
+function openCloudModal() {
+  const currentConfig = FirebaseService.getConfig();
+  if (currentConfig) {
+    DOM.firebaseConfigInput.value = JSON.stringify(currentConfig, null, 2);
+  } else {
+    DOM.firebaseConfigInput.value = '';
+  }
+
+  openModal(DOM.modalCloudConfig);
+}
+
+function parseFirebaseConfigInput(text) {
+  if (!text || !text.trim()) return null;
+
+  const raw = text.trim();
+
+  // 1. Coba parse sebagai JSON langsung
+  try {
+    const obj = JSON.parse(raw);
+    if (obj.apiKey) return obj;
+  } catch (e) {}
+
+  // 2. Ekstrak properti menggunakan regex jika user menempel potongan JS (misal const firebaseConfig = { ... })
+  const extract = (key) => {
+    const regex = new RegExp(`['"]?${key}['"]?\\s*:\\s*['"]([^'"]+)['"]`, 'i');
+    const match = raw.match(regex);
+    return match ? match[1] : '';
+  };
+
+  const apiKey = extract('apiKey');
+  const authDomain = extract('authDomain');
+  const projectId = extract('projectId');
+  const storageBucket = extract('storageBucket');
+  const messagingSenderId = extract('messagingSenderId');
+  const appId = extract('appId');
+
+  if (apiKey && projectId) {
+    return {
+      apiKey,
+      authDomain,
+      projectId,
+      storageBucket,
+      messagingSenderId,
+      appId
+    };
+  }
+
+  return null;
+}
+
+function handleSaveCloudConfig(e) {
+  e.preventDefault();
+
+  const text = DOM.firebaseConfigInput.value.trim();
+  if (!text) {
+    // Reset/Hapus konfigurasi kustom
+    localStorage.removeItem(STORAGE_KEYS.FIREBASE_CUSTOM);
+    showToast('Konfigurasi kustom dihapus. Kembali ke mode lokal.', 'info');
+    FirebaseService.init();
+    closeModal(DOM.modalCloudConfig);
+    return;
+  }
+
+  const parsed = parseFirebaseConfigInput(text);
+  if (!parsed || !parsed.apiKey || !parsed.projectId) {
+    showToast('Format konfigurasi tidak valid. Pastikan mengandung apiKey dan projectId.', 'error');
+    return;
+  }
+
+  // Simpan ke localStorage untuk pengujian instan di peramban ini
+  localStorage.setItem(STORAGE_KEYS.FIREBASE_CUSTOM, JSON.stringify(parsed));
+  showToast('Konfigurasi berhasil disimpan! Menyambungkan ke Cloud...', 'success');
+
+  // Re-inisialisasi Firebase
+  FirebaseService.init();
+}
+
+function handleCopyFileConfig() {
+  const text = DOM.firebaseConfigInput.value.trim();
+  const config = parseFirebaseConfigInput(text) || FirebaseService.getConfig();
+
+  if (!config) {
+    showToast('Mohon masukkan atau tempel konfigurasi Firebase terlebih dahulu.', 'error');
+    return;
+  }
+
+  const fileContent = `/**
+ * ===================================================================
+ * NEXUSLINK HUB - KONFIGURASI DATABASE CLOUD (FIREBASE FIRESTORE)
+ * ===================================================================
+ */
+
+const FIREBASE_CONFIG = ${JSON.stringify(config, null, 2)};
+`;
+
+  navigator.clipboard.writeText(fileContent)
+    .then(() => showToast('Kode disalin! Tempelkan ke berkas firebase-config.js di laptop Anda.', 'success'))
+    .catch(() => showToast('Gagal menyalin ke clipboard.', 'error'));
+}
+
+async function handleSeedCloudData() {
+  if (!FirebaseService.isConnected) {
+    showToast('Cloud belum terhubung. Pastikan konfigurasi Firebase valid.', 'error');
+    return;
+  }
+
+  const confirmSeed = confirm('Unggah seluruh tautan demo bawaan ke Firebase Cloud? Data di cloud akan diperbarui.');
+  if (!confirmSeed) return;
+
+  try {
+    await FirebaseService.seedDefaults();
+    showToast('Berhasil mengunggah seluruh data demo ke Firebase Cloud!', 'success');
+  } catch (err) {
+    showToast(`Gagal mengunggah data: ${err.message}`, 'error');
+  }
+}
+
+/* ===================================================================
    EVENT LISTENERS INITIALIZATION
    =================================================================== */
 function initEventListeners() {
@@ -1179,7 +1506,15 @@ function initEventListeners() {
     renderLinks();
   });
 
-  // 7. Shortcut Keyboard ESC untuk menutup modal yang aktif
+  // 7. Cloud Firebase Modal
+  if (DOM.btnOpenCloudModal) DOM.btnOpenCloudModal.addEventListener('click', openCloudModal);
+  if (DOM.cloudIndicator) DOM.cloudIndicator.addEventListener('click', openCloudModal);
+  if (DOM.btnCloseCloudModal) DOM.btnCloseCloudModal.addEventListener('click', () => closeModal(DOM.modalCloudConfig));
+  if (DOM.cloudConfigForm) DOM.cloudConfigForm.addEventListener('submit', handleSaveCloudConfig);
+  if (DOM.btnCopyFileConfig) DOM.btnCopyFileConfig.addEventListener('click', handleCopyFileConfig);
+  if (DOM.btnSeedCloudData) DOM.btnSeedCloudData.addEventListener('click', handleSeedCloudData);
+
+  // 8. Shortcut Keyboard ESC untuk menutup modal yang aktif
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(modal => {
@@ -1233,6 +1568,7 @@ function initApp() {
   renderLinks();
   updateStats();
   initEventListeners();
+  FirebaseService.init();
   console.log('Satu Pintu siap digunakan.');
 }
 
