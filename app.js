@@ -303,7 +303,7 @@ const FirebaseService = {
 
   updateStatus(status, title, desc) {
     if (DOM.cloudIndicator) {
-      DOM.cloudIndicator.className = `cloud-indicator ${status}`;
+      DOM.cloudIndicator.className = `cloud-indicator ${status}${state.isAdmin ? '' : ' hidden'}`;
       if (DOM.cloudText) {
         if (status === 'connected') DOM.cloudText.textContent = 'Cloud Terhubung';
         else if (status === 'connecting') DOM.cloudText.textContent = 'Menyambungkan...';
@@ -520,6 +520,7 @@ function updateRoleUI() {
     DOM.roleText.textContent = 'Mode Admin (Aktif)';
     DOM.adminQuickActions.classList.remove('hidden');
     DOM.adminBanner.classList.remove('hidden');
+    if (DOM.cloudIndicator) DOM.cloudIndicator.classList.remove('hidden');
 
     // Periksa apakah admin masih menggunakan kata sandi bawaan
     const isUsingDefaultPwd = state.getAdminPassword() === DEFAULT_ADMIN_PASSWORD;
@@ -543,6 +544,7 @@ function updateRoleUI() {
     DOM.adminBanner.classList.add('hidden');
     DOM.bannerSecurityWarning.classList.add('hidden');
     DOM.btnBannerQuickChangePwd.classList.add('hidden');
+    if (DOM.cloudIndicator) DOM.cloudIndicator.classList.add('hidden');
 
     DOM.authBtnLabel.textContent = 'Masuk Admin';
     DOM.authIcon.innerHTML = `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>`;
