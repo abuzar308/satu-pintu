@@ -199,18 +199,18 @@ const FirebaseService = {
   unsubscribeMeta: null,
 
   getConfig() {
-    // 1. Cek konfigurasi kustom di localStorage jika admin pernah mengisi lewat modal
+    // 1. Berkas firebase-config.js diutamakan jika sudah diisi konfigurasi valid
+    if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('ISI_')) {
+      return FIREBASE_CONFIG;
+    }
+
+    // 2. Cek konfigurasi kustom di localStorage jika admin pernah mengisi lewat modal
     const savedCustom = localStorage.getItem(STORAGE_KEYS.FIREBASE_CUSTOM);
     if (savedCustom) {
       try {
         const parsed = JSON.parse(savedCustom);
         if (parsed.apiKey && !parsed.apiKey.startsWith('ISI_')) return parsed;
       } catch (e) { }
-    }
-
-    // 2. Cek variabel FIREBASE_CONFIG dari firebase-config.js
-    if (typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('ISI_')) {
-      return FIREBASE_CONFIG;
     }
 
     return null;
@@ -266,12 +266,20 @@ const FirebaseService = {
         renderLinks();
         updateStats();
       } else {
-        // Jika database di Firestore kosong (misal tautan sengaja dihapus semua),
-        // jangan memunculkan data demo secara paksa agar tautan yang dihapus tidak muncul kembali
-        state.links = [];
-        state.saveLinksLocal();
-        renderLinks();
-        updateStats();
+        // Jika database Firestore kosong tapi admin memiliki tautan di lokal,
+        // jangan hapus tautan lokal! Sinkronkan tautan lokal ke Firestore.
+        if (state.links.length > 0) {
+          state.links.forEach(l => {
+            this.saveLink(l).catch(err => {
+              console.warn('Gagal sinkronisasi link lokal ke Cloud:', err);
+            });
+          });
+        } else {
+          state.links = [];
+          state.saveLinksLocal();
+          renderLinks();
+          updateStats();
+        }
       }
     }, (error) => {
       console.error('Firestore snapshot links error:', error);
@@ -1022,12 +1030,12 @@ function handleSaveLinkSubmit(e) {
         updatedAt: Date.now()
       };
       state.saveLinks();
-      if (FirebaseService.isInitialized && FirebaseService.isConnected) {
+      if (FirebaseService.isInitialized && FirebaseService.db) {
         FirebaseService.saveLink(state.links[index])
           .then(() => showToast(`Tautan "${title}" berhasil diperbarui di Cloud!`, 'success'))
           .catch(err => {
             console.error('Gagal sync ke Firebase:', err);
-            showToast(`Peringatan: Gagal simpan ke Cloud: ${err.message}. Periksa izin tab Rules Firebase!`, 'error');
+            alert(`PERINGATAN FIREBASE:\n\nTautan gagal diperbarui di Cloud Database.\nPenyebab: "${err.message}"\n\nPastikan di Firebase Console > Firestore Database > Aturan (Rules) sudah diubah menjadi:\nallow read, write: if true;\ndan tombol "Publikasikan" sudah diklik.`);
           });
       } else {
         showToast(`Tautan "${title}" berhasil diperbarui (Mode Lokal)!`, 'success');
@@ -1050,12 +1058,12 @@ function handleSaveLinkSubmit(e) {
     };
     state.links.unshift(newLink);
     state.saveLinks();
-    if (FirebaseService.isInitialized && FirebaseService.isConnected) {
+    if (FirebaseService.isInitialized && FirebaseService.db) {
       FirebaseService.saveLink(newLink)
         .then(() => showToast(`Tautan "${title}" berhasil ditambahkan ke Cloud!`, 'success'))
         .catch(err => {
           console.error('Gagal sync ke Firebase:', err);
-          showToast(`Peringatan: Gagal simpan ke Cloud: ${err.message}. Periksa izin tab Rules Firebase!`, 'error');
+          alert(`PERINGATAN FIREBASE:\n\nTautan "${title}" gagal disimpan ke Cloud Database.\nPenyebab: "${err.message}"\n\nPastikan di Firebase Console > Firestore Database > Aturan (Rules) sudah diubah menjadi:\nallow read, write: if true;\ndan tombol "Publikasikan" sudah diklik.`);
         });
     } else {
       showToast(`Tautan "${title}" berhasil ditambahkan ke dashboard!`, 'success');
