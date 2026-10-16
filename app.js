@@ -266,8 +266,12 @@ const FirebaseService = {
         renderLinks();
         updateStats();
       } else {
-        // Jika database di Firestore masih kosong sama sekali, seed data otomatis
-        this.seedDefaults().catch(e => console.warn('Auto seed skipped:', e));
+        // Jika database di Firestore kosong (misal tautan sengaja dihapus semua),
+        // jangan memunculkan data demo secara paksa agar tautan yang dihapus tidak muncul kembali
+        state.links = [];
+        state.saveLinksLocal();
+        renderLinks();
+        updateStats();
       }
     }, (error) => {
       console.error('Firestore snapshot links error:', error);
@@ -1018,10 +1022,16 @@ function handleSaveLinkSubmit(e) {
         updatedAt: Date.now()
       };
       state.saveLinks();
-      FirebaseService.saveLink(state.links[index]).catch(err => {
-        console.error('Gagal sync ke Firebase:', err);
-      });
-      showToast(`Tautan "${title}" berhasil diperbarui!`, 'success');
+      if (FirebaseService.isInitialized && FirebaseService.isConnected) {
+        FirebaseService.saveLink(state.links[index])
+          .then(() => showToast(`Tautan "${title}" berhasil diperbarui di Cloud!`, 'success'))
+          .catch(err => {
+            console.error('Gagal sync ke Firebase:', err);
+            showToast(`Peringatan: Gagal simpan ke Cloud: ${err.message}. Periksa izin tab Rules Firebase!`, 'error');
+          });
+      } else {
+        showToast(`Tautan "${title}" berhasil diperbarui (Mode Lokal)!`, 'success');
+      }
     }
   } else {
     // Mode Tambah Baru
@@ -1040,10 +1050,16 @@ function handleSaveLinkSubmit(e) {
     };
     state.links.unshift(newLink);
     state.saveLinks();
-    FirebaseService.saveLink(newLink).catch(err => {
-      console.error('Gagal sync ke Firebase:', err);
-    });
-    showToast(`Tautan "${title}" berhasil ditambahkan ke dashboard!`, 'success');
+    if (FirebaseService.isInitialized && FirebaseService.isConnected) {
+      FirebaseService.saveLink(newLink)
+        .then(() => showToast(`Tautan "${title}" berhasil ditambahkan ke Cloud!`, 'success'))
+        .catch(err => {
+          console.error('Gagal sync ke Firebase:', err);
+          showToast(`Peringatan: Gagal simpan ke Cloud: ${err.message}. Periksa izin tab Rules Firebase!`, 'error');
+        });
+    } else {
+      showToast(`Tautan "${title}" berhasil ditambahkan ke dashboard!`, 'success');
+    }
   }
 
   closeModal(DOM.modalLinkEditor);
@@ -1051,7 +1067,7 @@ function handleSaveLinkSubmit(e) {
   updateStats();
 }
 
-function handleDeleteLink(linkId, title) {
+async function handleDeleteLink(linkId, title) {
   if (!state.isAdmin) {
     showToast('Akses ditolak: Hanya admin yang dapat menghapus tautan.', 'error');
     return;
@@ -1060,14 +1076,28 @@ function handleDeleteLink(linkId, title) {
   const confirmDelete = confirm(`Apakah Anda yakin ingin menghapus tautan "${title}" secara permanen?`);
   if (!confirmDelete) return;
 
+  const previousLinks = [...state.links];
   state.links = state.links.filter(l => l.id !== linkId);
   state.saveLinks();
-  FirebaseService.deleteLink(linkId).catch(err => {
-    console.error('Gagal delete dari Firebase:', err);
-  });
   renderLinks();
   updateStats();
-  showToast(`Tautan "${title}" berhasil dihapus.`, 'info');
+
+  if (FirebaseService.isInitialized && FirebaseService.isConnected) {
+    try {
+      await FirebaseService.deleteLink(linkId);
+      showToast(`Tautan "${title}" berhasil dihapus dari Cloud Database.`, 'info');
+    } catch (err) {
+      console.error('Gagal delete dari Firebase:', err);
+      // Revert data jika server Firebase menolak penghapusan (misal karena Rules belum diizinkan)
+      state.links = previousLinks;
+      state.saveLinks();
+      renderLinks();
+      updateStats();
+      showToast(`Gagal menghapus dari Cloud: ${err.message}. Pastikan izin di tab Aturan (Rules) Firebase bernilai true!`, 'error');
+    }
+  } else {
+    showToast(`Tautan "${title}" berhasil dihapus (Mode Lokal).`, 'info');
+  }
 }
 
 /* ===================================================================
