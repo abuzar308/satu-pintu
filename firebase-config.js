@@ -18,10 +18,11 @@
  */
 
 const FIREBASE_CONFIG = {
-  apiKey: "ISI_API_KEY_ANDA",
-  authDomain: "ISI_AUTH_DOMAIN_ANDA",
-  projectId: "ISI_PROJECT_ID_ANDA",
-  storageBucket: "ISI_STORAGE_BUCKET_ANDA",
-  messagingSenderId: "ISI_MESSAGING_SENDER_ID_ANDA",
-  appId: "ISI_APP_ID_ANDA"
+  apiKey: "AIzaSyBATHp09Nsz3IOjiePMmhUvOH0zbcZNWJI",
+  authDomain: "satu-pintu-72a3e.firebaseapp.com",
+  projectId: "satu-pintu-72a3e",
+  storageBucket: "satu-pintu-72a3e.firebasestorage.app",
+  messagingSenderId: "250580209016",
+  ID aplikasi: "1:250580209016:web:c295d7c5310fb682a58c8d",
+  ID pengukuran: "G-T2Y9SMS8N9"
 };
