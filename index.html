@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Satu Pintu - Dashboard Portal Tautan</title>
+  <meta name="description"
+    content="Dashboard portal tautan modern dengan kontrol akses admin untuk penambahan dan pengelolaan link tampilan.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <!-- Background Glow FX -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <div class="app-container">
+    <!-- Header / Navbar -->
+    <header class="navbar" id="mainNavbar">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">Satu <span class="badge-pro">Pintu</span></span>
+          <span class="brand-subtitle">Portal Tautan Terintegrasi</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Widget Tanggal & Jam Realtime -->
+        <div class="live-clock-badge" id="liveClockBadge" title="Waktu Lokal Saat Ini">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span class="clock-date" id="clockDate">-- --- ----</span>
+          <span class="clock-divider">&bull;</span>
+          <span class="clock-time" id="clockTime">--:--:--</span>
+        </div>
+
+        <!-- Status Role Badge -->
+        <div class="role-indicator" id="roleIndicator">
+          <span class="status-dot"></span>
+          <span class="role-text" id="roleText">Mode Pengunjung</span>
+        </div>
+
+        <!-- Tombol Aksi Admin (Hanya tampil jika login admin) -->
+        <div class="admin-quick-actions hidden" id="adminQuickActions">
+          <button class="btn btn-primary" id="btnOpenAddModal">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Tambah Link Baru</span>
+          </button>
+          <button class="btn btn-secondary" id="btnOpenManageCategories" title="Kelola Kategori">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <span>Kategori</span>
+          </button>
+          <button class="btn btn-secondary" id="btnOpenDataManagement" title="Cadangkan / Pulihkan Data">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Data</span>
+          </button>
+          <button class="btn btn-secondary" id="btnOpenChangePassword" title="Ubah Kata Sandi Admin">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Ganti Sandi</span>
+          </button>
+        </div>
+
+        <!-- Tombol Login / Logout Admin -->
+        <button class="btn btn-ghost" id="btnAdminAuth">
+          <svg id="authIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span id="authBtnLabel">Masuk Admin</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Admin Notification Banner (Saat login) -->
+    <div class="admin-banner hidden" id="adminBanner">
+      <div class="banner-content">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <div class="banner-text-group">
+          <span><strong>Sesi Admin Aktif:</strong> Anda memiliki hak penuh untuk menambah, menyunting, mengatur
+            visibilitas, dan menghapus tautan tampilan.</span>
+          <span class="security-warning hidden" id="bannerSecurityWarning">
+            ⚠️ <em>Anda masih menggunakan sandi bawaan (admin123). Segera ganti agar akun Anda terlindungi!</em>
+          </span>
+        </div>
+        <button class="btn btn-warning-pill hidden" id="btnBannerQuickChangePwd">Ganti Sandi Sekarang</button>
+      </div>
+      <button class="banner-close" id="btnCloseBanner" aria-label="Tutup Banner">&times;</button>
+    </div>
+
+    <!-- Hero / Headline Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span class="pill-dot"></span>
+          <span>Sistem Tautan Terpusat & Terkelola</span>
+        </div>
+        <h1 class="hero-title">Akses Seluruh Aplikasi & Portal Dalam Satu Tampilan</h1>
+        <p class="hero-desc">
+          Kumpulan tautan penting, sistem internal, dan referensi kerja terkurasi langsung oleh administrator sistem.
+        </p>
+      </div>
+
+      <!-- Live Stats Counters -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon-wrapper blue">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-number" id="totalLinksCount">0</span>
+            <span class="stat-label">Total Tautan</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon-wrapper purple">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-number" id="totalCategoriesCount">0</span>
+            <span class="stat-label">Kategori</span>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon-wrapper green">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+              <polyline points="17 6 23 6 23 12"></polyline>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-number" id="totalClicksCount">0</span>
+            <span class="stat-label">Total Akses Klik</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filter & Search Toolbar -->
+    <section class="toolbar-section" id="toolbarSection">
+      <div class="search-box">
+        <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Cari nama tautan, deskripsi, atau URL..." autocomplete="off">
+        <button class="clear-search-btn hidden" id="btnClearSearch" title="Hapus pencarian">&times;</button>
+      </div>
+
+      <!-- Categories Pills -->
+      <div class="categories-filter" id="categoriesFilterBar">
+        <!-- Kategori akan di-generate via JavaScript -->
+      </div>
+
+      <!-- Sort Options -->
+      <div class="sort-wrapper">
+        <label for="sortSelect" class="sort-label">Urutkan:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="newest">Terbaru Ditambahkan</option>
+          <option value="popular">Paling Sering Diklik</option>
+          <option value="alphabetical">Nama A - Z</option>
+          <option value="pinned">Prioritas / Sematan</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Links Grid Container -->
+    <main class="links-display-area" id="linksDisplayArea">
+      <!-- Grid Tautan -->
+      <div class="links-grid" id="linksGrid">
+        <!-- Kartu tautan diisi otomatis oleh JavaScript -->
+      </div>
+
+      <!-- Tampilan Kosong (Empty State) -->
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon-box">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h3 id="emptyTitle">Tidak Ada Tautan Ditemukan</h3>
+        <p id="emptyDescription">Coba sesuaikan kata kunci pencarian atau ganti filter kategori.</p>
+        <button class="btn btn-primary hidden" id="btnEmptyAdd">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Tambah Tautan Pertama Sekarang</span>
+        </button>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="footer-left">
+        <p>&copy; 2026 <strong>Dito Jurinaldo, S.Kom.,M.Kom.</strong> &bull; Sistem Dashboard Tautan Aman</p>
+      </div>
+      <div class="footer-right">
+        <span class="footer-hint">Hanya Administrator yang memiliki wewenang mengelola tautan publik.</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Modal Login Admin -->
+  <div class="modal-overlay hidden" id="modalAdminAuth">
+    <div class="modal-box modal-auth">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-header-icon lock">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Autentikasi Administrator</h3>
+            <p>Masukkan kata sandi untuk mengelola tautan tampilan</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseAuthModal">&times;</button>
+      </div>
+
+      <form id="adminLoginForm" class="modal-form">
+        <div class="form-group">
+          <label for="adminPasswordInput">Kata Sandi Admin</label>
+          <div class="password-input-wrap">
+            <input type="password" id="adminPasswordInput" placeholder="Masukkan kata sandi..." required
+              autocomplete="current-password">
+            <button type="button" class="btn-toggle-pwd" id="btnTogglePwd" title="Tampilkan/Sembunyikan">
+              <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <span class="form-hint">Kata sandi default: <code>admin123</code></span>
+        </div>
+
+        <div class="form-error-msg hidden" id="authErrorMsg">
+          Kata sandi yang Anda masukkan salah. Silakan coba lagi.
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btnCancelAuth">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitAuth">
+            <span>Masuk sebagai Admin</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Modal Tambah / Edit Link (Hanya untuk Admin) -->
+  <div class="modal-overlay hidden" id="modalLinkEditor">
+    <div class="modal-box modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-header-icon link">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 id="linkModalTitle">Tambah Tautan Baru</h3>
+            <p id="linkModalSubtitle">Tautan ini akan langsung muncul pada dashboard pengguna</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseLinkModal">&times;</button>
+      </div>
+
+      <form id="linkForm" class="modal-form">
+        <input type="hidden" id="linkIdInput">
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="linkTitleInput">Nama / Judul Tautan <span class="required">*</span></label>
+            <input type="text" id="linkTitleInput" placeholder="Contoh: Portal HRD Internal, GitHub Org..." required>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="linkCategorySelect">Kategori <span class="required">*</span></label>
+            <select id="linkCategorySelect" required>
+              <!-- Diisi via JavaScript -->
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="linkUrlInput">URL Target Tautan <span class="required">*</span></label>
+          <div class="url-input-wrap">
+            <span class="url-prefix">https://</span>
+            <input type="url" id="linkUrlInput" placeholder="example.com/portal" required>
+          </div>
+          <span class="form-hint">Masukkan alamat URL lengkap termasuk protokol http:// atau https://</span>
+        </div>
+
+        <div class="form-group">
+          <label for="linkDescriptionInput">Deskripsi Singkat</label>
+          <textarea id="linkDescriptionInput" rows="2"
+            placeholder="Jelaskan kegunaan tautan ini bagi pengguna atau tim..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="linkIconTypeSelect">Tipe Ikon</label>
+            <select id="linkIconTypeSelect">
+              <option value="auto">Deteksi Otomatis Favicon</option>
+              <option value="preset-server">Ikon Server / Cloud</option>
+              <option value="preset-code">Ikon Development / Kode</option>
+              <option value="preset-document">Ikon Dokumen / Wiki</option>
+              <option value="preset-analytics">Ikon Analitik / Laporan</option>
+              <option value="preset-shield">Ikon Keamanan / Auth</option>
+              <option value="preset-chat">Ikon Komunikasi / Chat</option>
+              <option value="preset-external">Ikon Tautan Eksternal</option>
+            </select>
+          </div>
+
+          <div class="form-group flex-1">
+            <label for="linkBadgeColor">Warna Aksen Kartu</label>
+            <select id="linkBadgeColor">
+              <option value="blue">Biru Elektrik</option>
+              <option value="purple">Ungu Cyber</option>
+              <option value="emerald">Hijau Zamrud</option>
+              <option value="amber">Kuning Emas</option>
+              <option value="rose">Merah Mawar</option>
+              <option value="cyan">Cyan Modern</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row toggles-row">
+          <label class="toggle-control">
+            <input type="checkbox" id="linkIsPinned">
+            <span class="toggle-switch"></span>
+            <span class="toggle-label">Sematkan di Atas (Pin to Top)</span>
+          </label>
+
+          <label class="toggle-control">
+            <input type="checkbox" id="linkIsVisible" checked>
+            <span class="toggle-switch"></span>
+            <span class="toggle-label">Tampilkan di Publik</span>
+          </label>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btnCancelLinkModal">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveLink">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span id="btnSaveLinkText">Simpan Tautan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3. Modal Kelola Kategori (Hanya Admin) -->
+  <div class="modal-overlay hidden" id="modalCategoryManager">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-header-icon category">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </div>
+          <div>
+            <h3>Kelola Kategori</h3>
+            <p>Atur pengelompokan tautan pada dashboard</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseCatModal">&times;</button>
+      </div>
+
+      <div class="category-manager-body">
+        <!-- Form Tambah Kategori -->
+        <form id="addCategoryForm" class="add-cat-form">
+          <div class="add-cat-input-wrap">
+            <input type="text" id="newCategoryName" placeholder="Nama kategori baru..." required>
+            <button type="submit" class="btn btn-primary btn-sm">Tambah</button>
+          </div>
+        </form>
+
+        <!-- Daftar Kategori -->
+        <div class="category-list-label">Daftar Kategori Terdaftar:</div>
+        <ul class="category-list" id="categoryItemsList">
+          <!-- Diisi via JavaScript -->
+        </ul>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btnCloseCatModalBottom">Selesai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Modal Cadangan / Pengelolaan Data (JSON Backup & Restore) -->
+  <div class="modal-overlay hidden" id="modalDataManager">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-header-icon data">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <div>
+            <h3>Cadangan & Pulihkan Data</h3>
+            <p>Simpan data tautan ke file atau reset ke pengaturan awal</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseDataModal">&times;</button>
+      </div>
+
+      <div class="data-manager-body">
+        <div class="data-action-card">
+          <div class="data-action-info">
+            <h4>Ekspor Cadangan (JSON)</h4>
+            <p>Unduh seluruh data tautan dan kategori ke file komputer Anda.</p>
+          </div>
+          <button class="btn btn-secondary" id="btnExportData">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>Ekspor</span>
+          </button>
+        </div>
+
+        <div class="data-action-card">
+          <div class="data-action-info">
+            <h4>Impor Cadangan</h4>
+            <p>Muat file cadangan JSON yang telah diekspor sebelumnya.</p>
+          </div>
+          <label class="btn btn-secondary file-upload-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>Impor</span>
+            <input type="file" id="importFileInput" accept=".json" class="hidden">
+          </label>
+        </div>
+
+        <div class="data-action-card danger-zone">
+          <div class="data-action-info">
+            <h4>Muat Ulang Data Sampel</h4>
+            <p>Kembalikan data ke contoh awal sistem portal (data demo bawaan).</p>
+          </div>
+          <button class="btn btn-danger-outline" id="btnResetDefaultData">
+            <span>Reset ke Default</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="btnCloseDataModalBottom">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Modal Pengaturan Kata Sandi Admin -->
+  <div class="modal-overlay hidden" id="modalChangePassword">
+    <div class="modal-box modal-auth">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-header-icon lock">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div>
+            <h3>Ubah Kata Sandi Admin</h3>
+            <p>Amankan akses dashboard dari pihak yang tidak berwenang</p>
+          </div>
+        </div>
+        <button class="modal-close-btn" id="btnCloseChangePwdModal">&times;</button>
+      </div>
+
+      <form id="changePasswordForm" class="modal-form">
+        <div class="form-group">
+          <label for="currentPasswordInput">Kata Sandi Saat Ini <span class="required">*</span></label>
+          <div class="password-input-wrap">
+            <input type="password" id="currentPasswordInput" placeholder="Masukkan kata sandi saat ini..." required
+              autocomplete="current-password">
+            <button type="button" class="btn-toggle-pwd" id="btnToggleCurrentPwd" title="Tampilkan/Sembunyikan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newPasswordInput">Kata Sandi Baru <span class="required">*</span></label>
+          <div class="password-input-wrap">
+            <input type="password" id="newPasswordInput" placeholder="Minimal 6 karakter..." required minlength="6"
+              autocomplete="new-password">
+            <button type="button" class="btn-toggle-pwd" id="btnToggleNewPwd" title="Tampilkan/Sembunyikan">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+          </div>
+          <span class="form-hint">Gunakan kombinasi yang kuat (huruf/angka) agar tidak mudah ditebak.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmNewPasswordInput">Konfirmasi Kata Sandi Baru <span class="required">*</span></label>
+          <input type="password" id="confirmNewPasswordInput" placeholder="Ketik ulang kata sandi baru..." required
+            minlength="6" autocomplete="new-password">
+        </div>
+
+        <div class="form-error-msg hidden" id="changePwdErrorMsg"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="btnCancelChangePwd">Batal</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveNewPassword">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Simpan Sandi Baru</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container untuk Notifikasi Dinamis -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Logika Utama Aplikasi -->
+  <script src="app.js"></script>
+</body>
+
+</html>
