@@ -18,102 +18,65 @@ const STORAGE_KEYS = {
 // Kata Sandi Admin Bawaan (Default Password)
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
-// Data Sampel Awal (Initial Seed Data)
+// Data Sampel Awal (Initial Seed Data - Sesuai Tampilan Referensi)
 const INITIAL_CATEGORIES = ['Pengembangan', 'Operasional', 'Desain & UI', 'Internal HR', 'Infrastruktur'];
 
 const INITIAL_LINKS = [
   {
     id: 'link-1',
-    title: 'Repositori Proyek GitHub',
-    url: 'https://github.com',
-    description: 'Akses ke seluruh repositori kode sumber, pull request, dan issue tracking organisasi.',
-    category: 'Pengembangan',
-    iconType: 'preset-code',
-    badgeColor: 'blue',
-    clicks: 142,
-    isPinned: true,
-    isVisible: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 5
-  },
-  {
-    id: 'link-2',
-    title: 'AWS Cloud Console & Cluster',
-    url: 'https://aws.amazon.com/console',
-    description: 'Manajemen server production, kontainer Kubernetes, dan layanan cloud microservices.',
-    category: 'Infrastruktur',
-    iconType: 'preset-server',
-    badgeColor: 'amber',
-    clicks: 98,
-    isPinned: true,
-    isVisible: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 4
-  },
-  {
-    id: 'link-3',
-    title: 'Figma Design System & UI Kit',
-    url: 'https://figma.com',
-    description: 'Pusat komponen desain, prototype antarmuka pengguna, dan guideline visual produk.',
-    category: 'Desain & UI',
+    title: 'Tampilan Anggaran Sarpras SD',
+    url: 'https://sarpras.kemdikbud.go.id',
+    description: 'Akses untuk melihat dan mengelola tampilan anggaran sarana prasarana di tingkat SD.',
+    category: 'Operasional',
     iconType: 'preset-document',
-    badgeColor: 'purple',
-    clicks: 74,
+    badgeColor: 'blue',
+    clicks: 0,
     isPinned: false,
     isVisible: true,
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3
   },
   {
-    id: 'link-4',
-    title: 'Portal HR & Pengajuan Cuti',
-    url: 'https://workday.com',
-    description: 'Sistem absensi karyawan, formulir klaim biaya, dan informasi slip gaji bulanan.',
-    category: 'Internal HR',
-    iconType: 'preset-shield',
+    id: 'link-2',
+    title: 'Kalkulator SIPD Sarpras',
+    url: 'https://sipd.kemendagri.go.id',
+    description: 'Aplikasi kalkulator untuk perhitungan SIPD sarana prasarana.',
+    category: 'Operasional',
+    iconType: 'preset-calculator',
     badgeColor: 'emerald',
-    clicks: 53,
+    clicks: 0,
     isPinned: false,
     isVisible: true,
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2
   },
   {
-    id: 'link-5',
-    title: 'Dashboard Analitik Metrik Bisnis',
-    url: 'https://analytics.google.com',
-    description: 'Pantauan performa kunjungan harian, konversi pengguna, dan statistik performa aplikasi.',
+    id: 'link-3',
+    title: 'Sistem Informasi Sarpras SD',
+    url: 'https://dapo.kemdikbud.go.id',
+    description: 'Akses ke sistem informasi sarana prasarana tingkat SD.',
     category: 'Operasional',
-    iconType: 'preset-analytics',
-    badgeColor: 'cyan',
-    clicks: 86,
+    iconType: 'preset-server',
+    badgeColor: 'amber',
+    clicks: 0,
     isPinned: false,
     isVisible: true,
     createdAt: Date.now() - 1000 * 60 * 60 * 24 * 1
-  },
-  {
-    id: 'link-6',
-    title: 'Dokumentasi API & Integrasi',
-    url: 'https://postman.com',
-    description: 'Spesifikasi endpoint REST API, koleksi pengujian endpoint, dan panduan integrasi partner.',
-    category: 'Pengembangan',
-    iconType: 'preset-code',
-    badgeColor: 'rose',
-    clicks: 41,
-    isPinned: false,
-    isVisible: true,
-    createdAt: Date.now()
   }
 ];
 
 // SVG Icon Helpers
 const ICONS = {
-  server: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>`,
+  server: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`,
   code: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>`,
   document: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+  calculator: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><line x1="16" y1="14" x2="16" y2="18"></line><path d="M16 10h.01"></path><path d="M12 10h.01"></path><path d="M8 10h.01"></path><path d="M12 14h.01"></path><path d="M8 14h.01"></path><path d="M12 18h.01"></path><path d="M8 18h.01"></path></svg>`,
   analytics: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>`,
   shield: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
   chat: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
-  external: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
+  external: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
   pin: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4H17V2H7V4H8V12L5 15V17H11V22H13V17H19V15L16 12Z"/></svg>`,
   copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
-  eye: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+  linkMini: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
+  more: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle></svg>`,
   edit: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
   trash: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`
 };
@@ -134,7 +97,15 @@ class AppState {
   loadLinks() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.LINKS);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        // Jika masih berisi data sampel repositori GitHub lama, otomatis perbarui ke sampel Sarpras
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].title === 'Repositori Proyek GitHub') {
+          localStorage.setItem(STORAGE_KEYS.LINKS, JSON.stringify(INITIAL_LINKS));
+          return [...INITIAL_LINKS];
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error('Gagal memuat link dari storage:', e);
     }
@@ -154,7 +125,14 @@ class AppState {
   loadCategories() {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      if (data) return JSON.parse(data);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.includes('Produktivitas')) {
+          localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
+          return [...INITIAL_CATEGORIES];
+        }
+        return parsed;
+      }
     } catch (e) {
       console.error('Gagal memuat kategori dari storage:', e);
     }
@@ -595,7 +573,7 @@ function updateRoleUI() {
     if (DOM.cloudIndicator) DOM.cloudIndicator.classList.add('hidden');
 
     DOM.authBtnLabel.textContent = 'Masuk Admin';
-    DOM.authIcon.innerHTML = `<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>`;
+    DOM.authIcon.innerHTML = `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>`;
     DOM.btnAdminAuth.classList.remove('btn-secondary');
     DOM.btnAdminAuth.classList.add('btn-ghost');
   }
@@ -701,6 +679,17 @@ function updateStats() {
 /* ===================================================================
    RENDER FILTER KATEGORI & SORTING
    =================================================================== */
+function getCategoryIcon(catName) {
+  const map = {
+    'Pengembangan': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
+    'Operasional': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+    'Desain & UI': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.563-2.512 5.563-5.563C22 6.5 17.5 2 12 2z"></path></svg>',
+    'Internal HR': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+    'Infrastruktur': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>'
+  };
+  return map[catName] || '';
+}
+
 function renderCategoryFilterPills() {
   DOM.categoriesFilterBar.innerHTML = '';
 
@@ -709,7 +698,8 @@ function renderCategoryFilterPills() {
   allCategories.forEach(catName => {
     const pill = document.createElement('button');
     pill.className = `cat-pill ${catName === state.currentCategory ? 'active' : ''}`;
-    pill.textContent = catName;
+    const icon = getCategoryIcon(catName);
+    pill.innerHTML = `${icon ? `<span class="cat-pill-icon">${icon}</span>` : ''}<span>${escapeHtml(catName)}</span>`;
     pill.addEventListener('click', () => {
       state.currentCategory = catName;
       renderCategoryFilterPills();
@@ -814,6 +804,7 @@ function getCardIconContent(link) {
   if (link.iconType === 'preset-server') return ICONS.server;
   if (link.iconType === 'preset-code') return ICONS.code;
   if (link.iconType === 'preset-document') return ICONS.document;
+  if (link.iconType === 'preset-calculator') return ICONS.calculator;
   if (link.iconType === 'preset-analytics') return ICONS.analytics;
   if (link.iconType === 'preset-shield') return ICONS.shield;
   if (link.iconType === 'preset-chat') return ICONS.chat;
@@ -886,7 +877,6 @@ function createLinkCardElement(link) {
   }
 
   // Teks preview URL dan tombol salin hanya tampil untuk Admin.
-  // Saat mode pengunjung, teks link dihilangkan dan pengunjung cukup melihat tombol "Buka Link" saja.
   const urlPreviewHtml = state.isAdmin ? `
     <div class="card-url-preview">
       ${ICONS.external}
@@ -901,7 +891,7 @@ function createLinkCardElement(link) {
   ` : '';
 
   card.innerHTML = `
-    <div>
+    <div class="card-main-content">
       <div class="card-top">
         <div class="card-icon-box">
           ${iconHtml}
@@ -912,6 +902,7 @@ function createLinkCardElement(link) {
           </div>
           <h3 class="card-title">${escapeHtml(link.title)}</h3>
         </div>
+        <button class="card-more-btn" aria-label="Opsi">${ICONS.more}</button>
       </div>
 
       <div class="card-body">
@@ -923,7 +914,7 @@ function createLinkCardElement(link) {
     <div class="card-footer">
       <div class="card-public-bar">
         <div class="card-clicks-count" title="Jumlah kali tautan ini dibuka">
-          ${ICONS.eye}
+          ${ICONS.linkMini}
           <span><strong id="clicks-val-${link.id}">${link.clicks || 0}</strong> klik</span>
         </div>
 
