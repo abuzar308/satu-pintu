@@ -1370,10 +1370,11 @@ function parseFirebaseConfigInput(text) {
   const projectId = extract('projectId');
   const storageBucket = extract('storageBucket');
   const messagingSenderId = extract('messagingSenderId');
-  const appId = extract('appId');
+  const appId = extract('appId') || extract('ID aplikasi');
+  const measurementId = extract('measurementId') || extract('ID pengukuran');
 
   if (apiKey && projectId) {
-    return {
+    const res = {
       apiKey,
       authDomain,
       projectId,
@@ -1381,6 +1382,8 @@ function parseFirebaseConfigInput(text) {
       messagingSenderId,
       appId
     };
+    if (measurementId) res.measurementId = measurementId;
+    return res;
   }
 
   return null;

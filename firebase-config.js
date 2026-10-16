@@ -23,6 +23,6 @@ const FIREBASE_CONFIG = {
   projectId: "satu-pintu-72a3e",
   storageBucket: "satu-pintu-72a3e.firebasestorage.app",
   messagingSenderId: "250580209016",
-  ID aplikasi: "1:250580209016:web:c295d7c5310fb682a58c8d",
-  ID pengukuran: "G-T2Y9SMS8N9"
+  appId: "1:250580209016:web:c295d7c5310fb682a58c8d",
+  measurementId: "G-T2Y9SMS8N9"
 };
