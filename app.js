@@ -19,7 +19,9 @@ const STORAGE_KEYS = {
 const DEFAULT_ADMIN_PASSWORD = 'admin123';
 
 // Data Sampel Awal (Initial Seed Data - Sesuai Tampilan Referensi)
-const INITIAL_CATEGORIES = ['Pengembangan', 'Operasional', 'Internal HR', 'Media Sosial'];
+// 4 Kategori Resmi Sistem Sesuai Permintaan:
+// 1. Pengembangan, 2. Operasional, 3. Internal HRD, 4. Media Sosial
+const INITIAL_CATEGORIES = ['Pengembangan', 'Operasional', 'Internal HRD', 'Media Sosial'];
 
 const INITIAL_LINKS = [
   {
@@ -30,10 +32,11 @@ const INITIAL_LINKS = [
     category: 'Operasional',
     iconType: 'preset-document',
     badgeColor: 'blue',
-    clicks: 0,
-    isPinned: false,
+    clicks: 14,
+    isPinned: true,
+    isLocked: false,
     isVisible: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 4
   },
   {
     id: 'link-2',
@@ -43,23 +46,53 @@ const INITIAL_LINKS = [
     category: 'Operasional',
     iconType: 'preset-calculator',
     badgeColor: 'emerald',
-    clicks: 0,
+    clicks: 8,
     isPinned: false,
+    isLocked: false,
     isVisible: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 3
   },
   {
     id: 'link-3',
     title: 'Sistem Informasi Sarpras SD',
     url: 'https://dapo.kemdikbud.go.id',
-    description: 'Akses ke sistem informasi sarana prasarana tingkat SD.',
-    category: 'Operasional',
+    description: 'Akses ke sistem informasi sarana prasarana tingkat SD (Aplikasi Pengembangan).',
+    category: 'Pengembangan',
     iconType: 'preset-server',
-    badgeColor: 'amber',
-    clicks: 0,
+    badgeColor: 'purple',
+    clicks: 12,
     isPinned: false,
+    isLocked: true, // Contoh tautan terkunci (hanya admin yang dapat membuka & mengelola kunci)
     isVisible: true,
-    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 1
+    createdAt: Date.now() - 1000 * 60 * 60 * 24 * 2
+  },
+  {
+    id: 'link-4',
+    title: 'Portal Kepegawaian & Presensi HRD',
+    url: 'https://presensi.kepegawaian.go.id',
+    description: 'Layanan administrasi internal HRD, absensi digital, data staf dan cuti pegawai.',
+    category: 'Internal HRD',
+    iconType: 'preset-shield',
+    badgeColor: 'rose',
+    clicks: 6,
+    isPinned: false,
+    isLocked: false,
+    isVisible: true,
+    createdAt: Date.now() - 1000 * 60 * 60 * 18
+  },
+  {
+    id: 'link-5',
+    title: 'Kanal Media Sosial Resmi',
+    url: 'https://instagram.com',
+    description: 'Pusat publikasi informasi dan dokumentasi kegiatan publik melalui media sosial.',
+    category: 'Media Sosial',
+    iconType: 'preset-chat',
+    badgeColor: 'cyan',
+    clicks: 19,
+    isPinned: false,
+    isLocked: false,
+    isVisible: true,
+    createdAt: Date.now() - 1000 * 60 * 60 * 10
   }
 ];
 
@@ -74,6 +107,8 @@ const ICONS = {
   chat: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`,
   external: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
   pin: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4H17V2H7V4H8V12L5 15V17H11V22H13V17H19V15L16 12Z"/></svg>`,
+  lock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+  unlock: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`,
   copy: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
   linkMini: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>`,
   more: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1.5"></circle><circle cx="19" cy="12" r="1.5"></circle><circle cx="5" cy="12" r="1.5"></circle></svg>`,
@@ -98,13 +133,36 @@ class AppState {
     try {
       const data = localStorage.getItem(STORAGE_KEYS.LINKS);
       if (data) {
-        const parsed = JSON.parse(data);
+        let parsed = JSON.parse(data);
         // Jika masih berisi data sampel repositori GitHub lama, otomatis perbarui ke sampel Sarpras
         if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].title === 'Repositori Proyek GitHub') {
           localStorage.setItem(STORAGE_KEYS.LINKS, JSON.stringify(INITIAL_LINKS));
           return [...INITIAL_LINKS];
         }
-        return parsed;
+        if (Array.isArray(parsed)) {
+          let updated = false;
+          parsed = parsed.map(link => {
+            let cat = link.category;
+            if (cat === 'Internal HR') {
+              cat = 'Internal HRD';
+              updated = true;
+            } else if (!INITIAL_CATEGORIES.includes(cat)) {
+              cat = 'Pengembangan';
+              updated = true;
+            }
+            const isLocked = typeof link.isLocked === 'boolean' ? link.isLocked : false;
+            if (link.isLocked !== isLocked) updated = true;
+            return {
+              ...link,
+              category: cat,
+              isLocked: isLocked
+            };
+          });
+          if (updated) {
+            localStorage.setItem(STORAGE_KEYS.LINKS, JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.error('Gagal memuat link dari storage:', e);
@@ -123,24 +181,14 @@ class AppState {
   }
 
   loadCategories() {
-    try {
-      const data = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-      if (data) {
-        const parsed = JSON.parse(data);
-        if (Array.isArray(parsed) && parsed.includes('Produktivitas')) {
-          localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
-          return [...INITIAL_CATEGORIES];
-        }
-        return parsed;
-      }
-    } catch (e) {
-      console.error('Gagal memuat kategori dari storage:', e);
-    }
+    // Kategori sistem dikunci khusus pada 4 pilihan resmi:
+    // Pengembangan, Operasional, Internal HRD, Media Sosial
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(INITIAL_CATEGORIES));
     return [...INITIAL_CATEGORIES];
   }
 
   saveCategoriesLocal() {
+    this.categories = [...INITIAL_CATEGORIES];
     localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(this.categories));
   }
 
@@ -246,7 +294,11 @@ const FirebaseService = {
       if (!snapshot.empty) {
         const remoteLinks = [];
         snapshot.forEach(doc => {
-          remoteLinks.push({ id: doc.id, ...doc.data() });
+          const item = { id: doc.id, ...doc.data() };
+          if (item.category === 'Internal HR') item.category = 'Internal HRD';
+          if (!INITIAL_CATEGORIES.includes(item.category)) item.category = 'Pengembangan';
+          if (typeof item.isLocked !== 'boolean') item.isLocked = false;
+          remoteLinks.push(item);
         });
         state.links = remoteLinks;
         state.saveLinksLocal();
@@ -274,15 +326,13 @@ const FirebaseService = {
       this.updateStatus('offline', 'Sinkronisasi Cloud Terputus', `Izin baca/tulis Firestore bermasalah: ${error.message}`);
     });
 
-    // Listener Realtime untuk Kategori
+    // Listener Realtime untuk Kategori (Selalu menjaga 4 kategori standar)
     this.unsubscribeMeta = this.db.collection('nexuslink_meta').doc('categories').onSnapshot((doc) => {
-      if (doc.exists && Array.isArray(doc.data().list) && doc.data().list.length > 0) {
-        state.categories = doc.data().list;
-        state.saveCategoriesLocal();
-        renderCategoryFilterPills();
-        populateCategorySelect();
-        updateStats();
-      }
+      state.categories = [...INITIAL_CATEGORIES];
+      state.saveCategoriesLocal();
+      renderCategoryFilterPills();
+      populateCategorySelect();
+      updateStats();
     }, (error) => {
       console.error('Firestore snapshot categories error:', error);
     });
@@ -455,6 +505,7 @@ const DOM = {
   linkIconTypeSelect: document.getElementById('linkIconTypeSelect'),
   linkBadgeColor: document.getElementById('linkBadgeColor'),
   linkIsPinned: document.getElementById('linkIsPinned'),
+  linkIsLocked: document.getElementById('linkIsLocked'),
   linkIsVisible: document.getElementById('linkIsVisible'),
   btnCloseLinkModal: document.getElementById('btnCloseLinkModal'),
   btnCancelLinkModal: document.getElementById('btnCancelLinkModal'),
@@ -683,8 +734,9 @@ function getCategoryIcon(catName) {
   const map = {
     'Pengembangan': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
     'Operasional': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+    'Internal HRD': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
     'Internal HR': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-    'Media Sosial': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>'
+    'Media Sosial': '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>'
   };
   return map[catName] || '';
 }
@@ -833,8 +885,9 @@ function cleanUrlDisplay(rawUrl) {
 }
 
 function createLinkCardElement(link) {
+  const isLocked = !!link.isLocked;
   const card = document.createElement('article');
-  card.className = `link-card accent-${link.badgeColor || 'blue'} ${link.isPinned ? 'is-pinned' : ''} ${link.isVisible === false ? 'is-draft' : ''}`;
+  card.className = `link-card accent-${link.badgeColor || 'blue'} ${link.isPinned ? 'is-pinned' : ''} ${link.isVisible === false ? 'is-draft' : ''} ${isLocked ? 'is-locked' : ''}`;
   card.id = `link-card-${link.id}`;
 
   const iconHtml = getCardIconContent(link);
@@ -843,6 +896,9 @@ function createLinkCardElement(link) {
   let badgesHtml = `<span class="card-category-badge">${escapeHtml(link.category)}</span>`;
   if (link.isPinned) {
     badgesHtml += `<span class="card-pin-badge">${ICONS.pin} Disematkan</span>`;
+  }
+  if (isLocked) {
+    badgesHtml += `<span class="card-locked-badge">${ICONS.lock} Terkunci</span>`;
   }
   if (link.isVisible === false) {
     badgesHtml += `<span class="card-draft-badge">Draft (Tersembunyi)</span>`;
@@ -858,6 +914,9 @@ function createLinkCardElement(link) {
           Kontrol Admin:
         </span>
         <div class="card-admin-btns">
+          <button class="btn-admin-action ${isLocked ? 'active-lock' : ''}" data-action="toggle-lock" data-id="${link.id}" title="${isLocked ? 'Buka Kunci Tautan (Izinkan Pengunjung Membuka)' : 'Kunci Tautan (Cegah Pengunjung Membuka)'}">
+            ${isLocked ? ICONS.unlock + ' Buka Kunci' : ICONS.lock + ' Kunci'}
+          </button>
           <button class="btn-admin-action" data-action="toggle-pin" data-id="${link.id}" title="${link.isPinned ? 'Lepas Sematan' : 'Sematkan ke Atas'}">
             ${link.isPinned ? 'Unpin' : 'Pin'}
           </button>
@@ -889,6 +948,36 @@ function createLinkCardElement(link) {
     </button>
   ` : '';
 
+  // Tombol aksi buka tautan: Pengunjung diblokir jika link terkunci!
+  let actionBtnHtml = '';
+  if (isLocked) {
+    if (state.isAdmin) {
+      // Admin tetap dapat menguji/membuka tautan jika diperlukan
+      actionBtnHtml = `
+        <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="btn-open-link btn-admin-locked-open" data-action="open-link" data-id="${link.id}" title="Tautan Terkunci (Mode Admin)">
+          <span>Buka (Admin)</span>
+          ${ICONS.external}
+        </a>
+      `;
+    } else {
+      // Pengunjung: Tombol terkunci tanpa atribut href sehingga pengunjung tidak bisa membuka atau klik tautan!
+      actionBtnHtml = `
+        <button type="button" class="btn-open-link btn-locked-link" data-action="locked-link-click" title="Tautan ini telah dikunci oleh administrator sehingga tidak dapat dibuka">
+          <span>Terkunci</span>
+          ${ICONS.lock}
+        </button>
+      `;
+    }
+  } else {
+    // Normal: Pengunjung dan Admin dapat membuka tautan
+    actionBtnHtml = `
+      <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="btn-open-link" data-action="open-link" data-id="${link.id}">
+        <span>Buka Link</span>
+        ${ICONS.external}
+      </a>
+    `;
+  }
+
   card.innerHTML = `
     <div class="card-main-content">
       <div class="card-top">
@@ -919,10 +1008,7 @@ function createLinkCardElement(link) {
 
         <div class="card-btn-group">
           ${copyBtnHtml}
-          <a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" class="btn-open-link" data-action="open-link" data-id="${link.id}">
-            <span>Buka Link</span>
-            ${ICONS.external}
-          </a>
+          ${actionBtnHtml}
         </div>
       </div>
 
@@ -950,6 +1036,15 @@ function attachCardEvents(card, link) {
     });
   }
 
+  // 1b. Klik Tautan Terkunci (Peringatan Khusus untuk Pengunjung)
+  const lockedBtn = card.querySelector('[data-action="locked-link-click"]');
+  if (lockedBtn) {
+    lockedBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      showToast('🔒 Akses Ditolak: Tautan ini sedang dikunci oleh administrator sehingga tidak dapat dibuka.', 'warning');
+    });
+  }
+
   // 2. Salin URL
   const copyBtn = card.querySelector('[data-action="copy"]');
   if (copyBtn) {
@@ -972,7 +1067,24 @@ function attachCardEvents(card, link) {
     delBtn.addEventListener('click', () => handleDeleteLink(link.id, link.title));
   }
 
-  // 5. Admin Aksi: Toggle Pin
+  // 5. Admin Aksi: Toggle Lock (Kunci / Buka Kunci Tautan)
+  const lockBtn = card.querySelector('[data-action="toggle-lock"]');
+  if (lockBtn) {
+    lockBtn.addEventListener('click', () => {
+      link.isLocked = !link.isLocked;
+      state.saveLinks();
+      FirebaseService.updateLinkField(link.id, { isLocked: link.isLocked }).catch(e => console.warn(e));
+      renderLinks();
+      showToast(
+        link.isLocked
+          ? `Tautan "${link.title}" berhasil DIKUNCI 🔒 (Pengunjung tidak dapat membuka link ini).`
+          : `Tautan "${link.title}" berhasil DIBUKA KUNCI 🔓 (Pengunjung sekarang dapat mengakses link ini).`,
+        link.isLocked ? 'warning' : 'success'
+      );
+    });
+  }
+
+  // 6. Admin Aksi: Toggle Pin
   const pinBtn = card.querySelector('[data-action="toggle-pin"]');
   if (pinBtn) {
     pinBtn.addEventListener('click', () => {
@@ -984,7 +1096,7 @@ function attachCardEvents(card, link) {
     });
   }
 
-  // 6. Admin Aksi: Toggle Visibility
+  // 7. Admin Aksi: Toggle Visibility
   const visBtn = card.querySelector('[data-action="toggle-visibility"]');
   if (visBtn) {
     visBtn.addEventListener('click', () => {
@@ -1014,6 +1126,7 @@ function openAddLinkModal() {
   DOM.btnSaveLinkText.textContent = 'Simpan Tautan Baru';
   DOM.linkIsVisible.checked = true;
   DOM.linkIsPinned.checked = false;
+  if (DOM.linkIsLocked) DOM.linkIsLocked.checked = false;
 
   populateCategorySelect();
   openModal(DOM.modalLinkEditor);
@@ -1040,6 +1153,7 @@ function openEditLinkModal(linkId) {
   DOM.linkBadgeColor.value = link.badgeColor || 'blue';
   DOM.linkIsPinned.checked = !!link.isPinned;
   DOM.linkIsVisible.checked = link.isVisible !== false;
+  if (DOM.linkIsLocked) DOM.linkIsLocked.checked = !!link.isLocked;
 
   DOM.linkModalTitle.textContent = 'Sunting Tautan';
   DOM.linkModalSubtitle.textContent = `Memperbarui data tautan: ${link.title}`;
@@ -1066,6 +1180,7 @@ function handleSaveLinkSubmit(e) {
   const badgeColor = DOM.linkBadgeColor.value;
   const isPinned = DOM.linkIsPinned.checked;
   const isVisible = DOM.linkIsVisible.checked;
+  const isLocked = DOM.linkIsLocked ? DOM.linkIsLocked.checked : false;
 
   if (!title || !url || !category) {
     showToast('Mohon lengkapi semua bidang yang wajib diisi (*).', 'error');
@@ -1091,6 +1206,7 @@ function handleSaveLinkSubmit(e) {
         badgeColor,
         isPinned,
         isVisible,
+        isLocked,
         updatedAt: Date.now()
       };
       state.saveLinks();
@@ -1117,6 +1233,7 @@ function handleSaveLinkSubmit(e) {
       badgeColor,
       clicks: 0,
       isPinned,
+      isLocked,
       isVisible,
       createdAt: Date.now()
     };
@@ -1179,17 +1296,20 @@ async function handleDeleteLink(linkId, title) {
 /* ===================================================================
    ADMIN MANAJEMEN KATEGORI
    =================================================================== */
+/* ===================================================================
+   ADMIN MANAJEMEN KATEGORI (4 KATEGORI RESMI SISTEM)
+   =================================================================== */
 function openCategoryManagerModal() {
   if (!state.isAdmin) {
-    showToast('Akses ditolak: Hanya admin yang dapat mengelola kategori.', 'error');
+    showToast('Akses ditolak: Hanya admin yang dapat melihat status kategori.', 'error');
     return;
   }
   renderCategoryManagerList();
   openModal(DOM.modalCategoryManager);
-  DOM.newCategoryName.focus();
 }
 
 function renderCategoryManagerList() {
+  if (!DOM.categoryItemsList) return;
   DOM.categoryItemsList.innerHTML = '';
 
   state.categories.forEach(cat => {
@@ -1197,71 +1317,24 @@ function renderCategoryManagerList() {
     const li = document.createElement('li');
     li.className = 'category-item';
     li.innerHTML = `
-      <span class="category-item-name">${escapeHtml(cat)}</span>
+      <div class="category-item-info">
+        <span class="category-item-badge">${getCategoryIcon(cat)}</span>
+        <span class="category-item-name">${escapeHtml(cat)}</span>
+      </div>
       <span class="category-item-count">${count} tautan</span>
-      <button class="btn-delete-cat" title="Hapus Kategori" data-cat="${escapeHtml(cat)}">
-        ${ICONS.trash}
-      </button>
     `;
-
-    li.querySelector('.btn-delete-cat').addEventListener('click', () => {
-      handleDeleteCategory(cat, count);
-    });
 
     DOM.categoryItemsList.appendChild(li);
   });
 }
 
 function handleAddCategory(e) {
-  e.preventDefault();
-  const name = DOM.newCategoryName.value.trim();
-  if (!name) return;
-
-  if (state.categories.includes(name)) {
-    showToast('Kategori ini sudah terdaftar.', 'error');
-    return;
-  }
-
-  state.categories.push(name);
-  state.saveCategories();
-  DOM.newCategoryName.value = '';
-  renderCategoryManagerList();
-  renderCategoryFilterPills();
-  updateStats();
-  showToast(`Kategori "${name}" berhasil ditambahkan!`, 'success');
+  if (e) e.preventDefault();
+  showToast('Sistem dikonfigurasi tetap pada 4 kategori standar (Pengembangan, Operasional, Internal HRD, Media Sosial).', 'info');
 }
 
-function handleDeleteCategory(catName, count) {
-  if (state.categories.length <= 1) {
-    showToast('Minimal harus ada satu kategori dalam sistem.', 'error');
-    return;
-  }
-
-  if (count > 0) {
-    const proceed = confirm(`Kategori "${catName}" masih memiliki ${count} tautan. Tautan tersebut akan dialihkan ke kategori "${state.categories[0]}". Lanjutkan?`);
-    if (!proceed) return;
-
-    // Alihkan link ke kategori pertama yang tersisa
-    state.links.forEach(l => {
-      if (l.category === catName) {
-        l.category = state.categories[0];
-      }
-    });
-    state.saveLinks();
-  }
-
-  state.categories = state.categories.filter(c => c !== catName);
-  state.saveCategories();
-
-  if (state.currentCategory === catName) {
-    state.currentCategory = 'Semua';
-  }
-
-  renderCategoryManagerList();
-  renderCategoryFilterPills();
-  renderLinks();
-  updateStats();
-  showToast(`Kategori "${catName}" berhasil dihapus.`, 'info');
+function handleDeleteCategory() {
+  showToast('Kategori standar sistem dilindungi dan tidak dapat dihapus.', 'info');
 }
 
 /* ===================================================================
@@ -1303,9 +1376,18 @@ function handleImportBackup(e) {
   reader.onload = function (event) {
     try {
       const data = JSON.parse(event.target.result);
-      if (Array.isArray(data.links) && Array.isArray(data.categories)) {
-        state.links = data.links;
-        state.categories = data.categories;
+      if (Array.isArray(data.links)) {
+        state.links = data.links.map(l => {
+          let cat = l.category;
+          if (cat === 'Internal HR') cat = 'Internal HRD';
+          if (!INITIAL_CATEGORIES.includes(cat)) cat = 'Pengembangan';
+          return {
+            ...l,
+            category: cat,
+            isLocked: typeof l.isLocked === 'boolean' ? l.isLocked : false
+          };
+        });
+        state.categories = [...INITIAL_CATEGORIES];
         state.saveLinks();
         state.saveCategories();
         renderCategoryFilterPills();
@@ -1584,9 +1666,9 @@ function initEventListeners() {
   DOM.btnCancelLinkModal.addEventListener('click', () => closeModal(DOM.modalLinkEditor));
 
   // 4. Category Modal
-  DOM.addCategoryForm.addEventListener('submit', handleAddCategory);
-  DOM.btnCloseCatModal.addEventListener('click', () => closeModal(DOM.modalCategoryManager));
-  DOM.btnCloseCatModalBottom.addEventListener('click', () => closeModal(DOM.modalCategoryManager));
+  if (DOM.addCategoryForm) DOM.addCategoryForm.addEventListener('submit', handleAddCategory);
+  if (DOM.btnCloseCatModal) DOM.btnCloseCatModal.addEventListener('click', () => closeModal(DOM.modalCategoryManager));
+  if (DOM.btnCloseCatModalBottom) DOM.btnCloseCatModalBottom.addEventListener('click', () => closeModal(DOM.modalCategoryManager));
 
   // 5. Data Modal
   DOM.btnExportData.addEventListener('click', handleExportBackup);

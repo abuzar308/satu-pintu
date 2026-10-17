@@ -30,8 +30,8 @@ Aplikasi ini dibangun menggunakan teknologi murni web (*Vanilla HTML5, CSS3, & M
 Ketika login sebagai Administrator berhasil:
 - Indikator status berubah menjadi **Mode Admin (Aktif)** berwarna hijau.
 - Teks alamat URL target dan tombol salin tautan ditampilkan untuk keperluan administrasi.
-- Muncul bilah kontrol admin (**Tambah Link Baru**, **Kelola Kategori**, **Cadangan Data**, dan **Ganti Sandi**).
-- Pada setiap kartu tautan muncul tindakan admin: **Pin / Unpin**, **Tampilkan / Sembunyikan (Draft)**, **Edit**, dan **Hapus**.
+- Muncul bilah kontrol admin (**Tambah Link Baru**, **Kategori Sistem**, **Cadangan Data**, dan **Ganti Sandi**).
+- Pada setiap kartu tautan muncul tindakan admin: **Kunci / Buka Kunci (Lock/Unlock)**, **Pin / Unpin**, **Tampilkan / Sembunyikan (Draft)**, **Edit**, dan **Hapus**.
 
 ---
 
@@ -39,24 +39,29 @@ Ketika login sebagai Administrator berhasil:
 
 ### 1. Bagi Pengunjung (Mode Pengunjung)
 - **Tampilan Bersih & Minimalis**: Pengunjung dapat melihat kartu, nama sistem, ikon, kategori, dan deskripsi tautan tanpa teks URL mentah yang terekspos.
-- **Akses Langsung**: Pengunjung cukup mengklik tombol **"Buka Link"** untuk langsung menuju ke halaman target.
-- **Pencarian & Filter Real-Time**: Mencari tautan dan menyaring berdasarkan kategori tetap dapat digunakan secara interaktif.
+- **Akses Tautan Terbuka**: Pengunjung cukup mengklik tombol **"Buka Link"** untuk langsung menuju ke halaman target.
+- **Proteksi Tautan Terkunci**: Apabila suatu tautan dikunci oleh admin, tombol akan berubah menjadi **"Terkunci" 🔒** tanpa tautan URL aktif sehingga pengunjung **tidak bisa membuka atau mengklik** tautan tersebut.
+- **Pencarian & Filter Real-Time**: Mencari tautan dan menyaring berdasarkan 4 kategori standar: **Pengembangan**, **Operasional**, **Internal HRD**, dan **Media Sosial**.
 - **Widget Tanggal & Jam Realtime**: Menampilkan hari, tanggal, dan jam lokal di bilah atas.
 
 ### 2. Khusus Administrator (Kontrol Penuh)
+- **Kunci / Buka Kunci Tautan (Lock Feature)**:
+  - Admin dapat mengunci tautan langsung melalui tombol **"Kunci"** pada bilah kartu atau melalui saklar di formulir editor tautan.
+  - Tautan yang dikunci menampilkan badge **Terkunci** dan memblokir akses pengunjung secara instan.
 - **Tambah Tautan Baru**:
   - Nama / Judul Tautan.
   - Alamat URL target lengkap (otomatis mendeteksi protokol `https://`).
-  - Kategori (pilih yang sudah ada atau buat kategori baru).
+  - Kategori standar (pilihan khusus: **Pengembangan**, **Operasional**, **Internal HRD**, atau **Media Sosial**).
   - Deskripsi panduan bagi pengguna.
   - Pilihan ikon (deteksi favicon otomatis dari domain atau pilih ikon preset).
   - Pilihan warna aksen kartu (*Blue, Purple, Emerald, Amber, Rose, Cyan*).
   - Opsi sematkan di atas (*Pin to top*).
+  - Opsi penguncian tautan (*Kunci Tautan*).
   - Opsi visibilitas (*Publik* atau simpan sebagai *Draft/Tersembunyi*).
 - **Edit & Perbarui Tautan**: Mengubah data tautan yang sudah ada kapan saja.
 - **Hapus Tautan**: Menghapus tautan dengan konfirmasi keamanan.
-- **Kelola Kategori**: Menambah kategori baru atau menghapus kategori lama beserta migrasi otomatis tautan terkait.
-- **Ubah Kata Sandi Admin**: Mengganti kata sandi bawaan (`admin123`) dengan kata sandi rahasia pilihan Anda sendiri (minimal 6 karakter) agar hak admin tidak dapat disalahgunakan oleh orang lain.
+- **Kategori Sistem Resmi**: Sistem menggunakan 4 kategori standar (**Pengembangan**, **Operasional**, **Internal HRD**, **Media Sosial**) untuk pengelompokan yang konsisten.
+- **Ubah Kata Sandi Admin**: Mengganti kata sandi bawaan (`admin123`) dengan kata sandi rahasia pilihan Anda sendiri (minimal 6 karakter).
 - **Ekspor & Impor Cadangan (JSON)**: Menyimpan seluruh basis data tautan ke berkas JSON di komputer lokal atau memulihkan data dari berkas cadangan.
 - **Reset ke Data Sampel**: Opsi memuat kembali data demo awal jika diperlukan.
 

@@ -468,7 +468,10 @@
           <div class="form-group flex-1">
             <label for="linkCategorySelect">Kategori <span class="required">*</span></label>
             <select id="linkCategorySelect" required>
-              <!-- Diisi via JavaScript -->
+              <option value="Pengembangan">Pengembangan</option>
+              <option value="Operasional">Operasional</option>
+              <option value="Internal HRD">Internal HRD</option>
+              <option value="Media Sosial">Media Sosial</option>
             </select>
           </div>
         </div>
@@ -525,6 +528,12 @@
           </label>
 
           <label class="toggle-control">
+            <input type="checkbox" id="linkIsLocked">
+            <span class="toggle-switch toggle-switch-lock"></span>
+            <span class="toggle-label">Kunci Tautan (Pengunjung Tidak Bisa Buka)</span>
+          </label>
+
+          <label class="toggle-control">
             <input type="checkbox" id="linkIsVisible" checked>
             <span class="toggle-switch"></span>
             <span class="toggle-label">Tampilkan di Publik</span>
@@ -560,21 +569,25 @@
             </svg>
           </div>
           <div>
-            <h3>Kelola Kategori</h3>
-            <p>Atur pengelompokan tautan pada dashboard</p>
+            <h3>Kategori Sistem</h3>
+            <p>4 Kategori Standar Tautan Terdaftar</p>
           </div>
         </div>
         <button class="modal-close-btn" id="btnCloseCatModal">&times;</button>
       </div>
 
       <div class="category-manager-body">
-        <!-- Form Tambah Kategori -->
-        <form id="addCategoryForm" class="add-cat-form">
-          <div class="add-cat-input-wrap">
-            <input type="text" id="newCategoryName" placeholder="Nama kategori baru..." required>
-            <button type="submit" class="btn btn-primary btn-sm">Tambah</button>
+        <div class="category-fixed-notice">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <div>
+            <strong>Kategori Standar Resmi</strong>
+            <p>Sistem ini telah dikonfigurasi secara khusus dengan 4 pilihan kategori: <strong>Pengembangan</strong>, <strong>Operasional</strong>, <strong>Internal HRD</strong>, dan <strong>Media Sosial</strong>.</p>
           </div>
-        </form>
+        </div>
 
         <!-- Daftar Kategori -->
         <div class="category-list-label">Daftar Kategori Terdaftar:</div>
@@ -584,7 +597,7 @@
       </div>
 
       <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" id="btnCloseCatModalBottom">Selesai</button>
+        <button type="button" class="btn btn-secondary" id="btnCloseCatModalBottom">Tutup</button>
       </div>
     </div>
   </div>
